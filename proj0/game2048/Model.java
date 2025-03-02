@@ -93,6 +93,24 @@ public class Model extends Observable {
         checkGameOver();
         setChanged();
     }
+    /** Helper function to check if the given row, col are valid */
+    public static boolean Valid_index(int size, int col, int row){
+        if (row <0 || col<0){
+            return false;
+        }
+        if (row>=size || col>=size){
+            return false;
+        }
+        return true;
+    }
+    /** Helper method to check if the tile has any neighboring tile that is equivalent */
+    public static boolean check_tile (Board b, int current_tile, int col, int row) {
+        if (Valid_index(b.size(), col, row)) {
+            int neighbor_tile = b.tile(col, row).value();
+            return neighbor_tile == current_tile;
+        }
+        return false;
+    }
 
     /** Tilt the board toward SIDE. Return true iff this changes the board.
      *
@@ -106,21 +124,113 @@ public class Model extends Observable {
      *    value, then the leading two tiles in the direction of motion merge,
      *    and the trailing tile does not.
      * */
+
+    public int NumberNullSpacesInColumn(Board b, int column, int row){
+        // returns the number of null space above the current tile
+        int number_of_null = 0;
+        for (int i = 1; i < b.size()-row; i +=1) {
+            if (Valid_index(b.size(), column, i)){
+                Tile tile_to_check = b.tile(column, row+i);
+                if (tile_to_check == null) {
+                    number_of_null += 1;
+                }
+                else {
+                    break;
+                }
+            }
+        }
+        return number_of_null;
+    }
+    //up no merge for 1 column
+    // check if column has any empty value
+    // if so, return row +1
+    public int upNoMergeIndex(Board b,int column, int row){
+            int row_index = 0;// count the number of empty space above the current tile
+             Tile tile = b.tile(column, row);
+            if (tile!=null){
+                // get the number of space available for moving up
+                int up_space = NumberNullSpacesInColumn(b, column, row);
+                //if there is space to move up, check if index is valid
+                if (up_space >=1){
+                    if (Valid_index(b.size(), column, row+up_space)) {
+                        return up_space;
+                    }
+                }
+            }
+            return 0;
+        }
+
+    public static boolean UpBasicMergeMove(Board b, int column, int row) {
+        //check if the tile above has the same value
+        int current_tile = b.tile(column, row).value();
+        for (int i = row + 1; i < b.size(); i += 1) {
+            if (Valid_index(b.size(), column, i)) {
+                Tile tile_to_check = b.tile(column, i);
+                if (tile_to_check!=null){
+                    if (current_tile == tile_to_check.value()) {
+                        return true;
+                    }
+                    }
+                }
+            }
+        return false;
+    }
+
     public boolean tilt(Side side) {
         boolean changed;
         changed = false;
-
         // TODO: Modify this.board (and perhaps this.score) to account
-        // for the tilt to the Side SIDE. If the board changed, set the
-        // changed local variable to true.
-
-        checkGameOver();
-        if (changed) {
-            setChanged();
+        // for the tilt to the Side SIDE.
+        if (side != Side.NORTH) {
+            board.setViewingPerspective(side);
+            changed = true;
         }
-        return changed;
+        //merge up operations
+        for (int col = 0; col <= board.size() - 1; col += 1) {
+            // initialize an array to show whether each tile has been merged
+            boolean[] merged_tiles = new boolean[4];
+            // initialize a boolean to show whether a merged operation has happened
+            // loop starts at row 3(top row - no need to move because it's already at the top)
+            for (int row = board.size() - 1; row >= 0; row -= 1) {
+                int merge_move = 0;
+                Tile tile = board.tile(col, row);
+                if (tile != null) {
+                    int move_up_space = upNoMergeIndex(board, col, row);
+                    //check if merge has happened and if merge can happen
+                    if (UpBasicMergeMove(board, col, row)) {
+                        merge_move = 1;
+                        // if merged happens to a tile, then save it in the array
+                    }
+                    int total_move = merge_move + move_up_space;
+                    if (total_move > 0) {
+                        changed = true;
+                        //keeps track of the score
+                        if (total_move > move_up_space) {
+                            //check if merge has already taken place at the tile to be merged
+                            if (!merged_tiles[total_move + row]) {
+                                board.move(col, row + total_move, tile);
+                                // updates merged tiles
+                                merged_tiles[total_move + row] = true;
+                                //updates score
+                                score += tile.value() * 2;
+                            } else {
+                                board.move(col, row + move_up_space, tile);
+                            }
+                        }
+                        else {board.move(col, row + move_up_space, tile);}
+                    }
+                }
+            }
+        }
+            board.setViewingPerspective(Side.NORTH);
+            checkGameOver();
+            //changed = true;
+            //If the board changed, set the changed local variable to true.
+            if (changed) {
+                setChanged();
+            }
+            return changed;
     }
-
     /** Checks if the game is over and sets the gameOver variable
      *  appropriately.
      */
@@ -196,22 +306,6 @@ public class Model extends Observable {
                 }
                 }
             }
-        return false;
-    }
-    public static boolean Valid_index(int size, int col, int row){
-        if (row <0 || col<0){
-            return false;
-        }
-        if (row>=size || col>=size){
-            return false;
-        }
-        return true;
-    }
-    public static boolean check_tile (Board b, int current_tile, int col, int row) {
-        if (Valid_index(b.size(), row, col)) {
-            int neighbor_tile = b.tile(col, row).value();
-            return neighbor_tile == current_tile;
-        }
         return false;
     }
 
