@@ -35,13 +35,13 @@ public class TimeSLList {
             OpCounts.addLast(M);
             /* add the relative OpCount */
             /* Add Last Operation */
-            SLList TestList = new SLList();
+            SLList <Integer> TestList = new SLList<Integer>( );
             for (int j = 0; j < i; j += 1) {
                 TestList.addLast(j);
             }
             /* start the stopwatch */
             Stopwatch sw = new Stopwatch();
-            for (int k = 0; k < M; k += 1) {
+            for (int k = 0; k < M; k ++) {
                 TestList.getLast();
             }
             double timeInSeconds = sw.elapsedTime();

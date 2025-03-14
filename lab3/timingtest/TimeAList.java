@@ -28,7 +28,7 @@ public class TimeAList {
         AList <Integer> Ns = new AList<Integer>();
         AList <Integer> OpCounts = new AList<Integer>();
         AList <Double> times = new AList<Double>();
-        for (int i = 10000; i <= 10000000; i *= 2) {
+        for (int i = 1000; i <= 128000; i *= 2) {
             /* add the relative Ns */
             Ns.addLast(i);
             /* add the relative OpCount */
@@ -37,7 +37,7 @@ public class TimeAList {
             /* start the stopwatch */
             Stopwatch sw = new Stopwatch();
             AList<Integer> TestList = new AList<Integer>();
-            for (int j = 0; j < i; j += 1) {
+            for (int j = 0; j < i; j ++) {
                 TestList.addLast(j);
             }
             double timeInSeconds = sw.elapsedTime();
