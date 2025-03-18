@@ -119,8 +119,8 @@ public class LinkedListDeque<T> {
     }
     //** get the item at given index of the deque recursively*/
     public T getRecursive(int index){
-        if (index>0) {
-            return null
+        if (index>size) {
+            return null;
         }
         Node p = sentinel;
         return getRecursive(p.next, index).item;
@@ -128,7 +128,7 @@ public class LinkedListDeque<T> {
     // ** helper function for getRecursive */
     public Node getRecursive(Node current, int index){
         if (index==0){
-            return null;
+            return current;
         }
         return getRecursive(current.next, index-1);
     }
