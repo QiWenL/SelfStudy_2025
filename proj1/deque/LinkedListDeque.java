@@ -36,11 +36,11 @@ public class LinkedListDeque<T> {
         return size;
     }
     /** helper function to get the first item of the Deque */
-    public Node getFirst(){
+    private Node getFirst(){
         return sentinel.next;
     }
     /**helper function to get the last item of the Deque */
-    public Node getLast(){
+    private Node getLast(){
         return sentinel.prev;
     }
     /** Add to the front of the Deque */
